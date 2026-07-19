@@ -1,0 +1,22 @@
+## Introduzione
+Progetto per il corso Sicurezza appartenente alla triennale in Informatica de La Sapienza Università di Roma
+## Obiettivo
+creazione di un sito vulnerabile ad attacchi SQL Injection; successivamente, bisogna rendere il sito sicuro
+## To-do
+questa è la beta della beta della beta della beta....
+le cose da fare sono tante:
+### teoria / studio
+- cos'è un SQL Injection
+- quali sono gli elementi del codice che rendono possibile l'SQL Injection, e quali sono quelli che permettono di proteggere il sistema da questo attacco
+- studio **approfondito** del codice !
+### progetto
+- creazione dell'interfaccia con **vue.js** (adesso è scritta in html puro all'interno del file _main.go_
+- creazione di una pagina di login
+  - creazione di un database di utenti (DA SALVARE ANCHE SU FILE DI TESTO perché verrà modificato di continuo durante gli attacchi)
+  - qui verranno fatti gli attacchi per _entrare_ nel sistema senza credenziali
+- creazione di un file di testo con tutti gli script in SQL per attaccare
+- creazione di una pagina principale CHE ABBIA UNA BARRA DI RICERCA
+  - qui verranno fatti gli attacchi per _modificare_ i database
+- (opzionale) implementare il template decaffeinated coffee per portarsi avanti con wasa
+- (opzionale) fare l'interfaccia del sito in modo che ricordi infostud (così, sembra divertente)
+- to be continued....
