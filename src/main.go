@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"time"
 
+	// Importiamo il driver MySQL. Il blank identifier "_" è necessario
+	// perché Go carichi il driver dietro le quinte senza chiamarlo direttamente.
+
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -141,7 +144,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Passiamo queryParam come secondo argomento.
 		// Go e MySQL si assicureranno che venga trattato ESCLUSIVAMENTE come una stringa innocua.
-		
+
 		//rows, err := db.Query(sqlQuery, queryParam)
 
 		//--------------------------------------------
