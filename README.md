@@ -20,3 +20,7 @@ le cose da fare sono tante:
 - (opzionale) implementare il template decaffeinated coffee per portarsi avanti con wasa
 - (opzionale) fare l'interfaccia del sito in modo che ricordi infostud (così, sembra divertente)
 - to be continued....
+
+### notion
+sto tenendo nota dei progressi riguardanti il progetto sul mio notion:
+https://app.notion.com/p/SICUREZZA-3110dd71b5c6807890f8e764e39a1c86?source=copy_link
