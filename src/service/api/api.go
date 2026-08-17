@@ -80,11 +80,20 @@ func New(cfg Config) (Router, error) {
 	router.RedirectTrailingSlash = false
 	router.RedirectFixedPath = false
 
-	return &_router{
+	// Creiamo l'istanza del nostro router personalizzato
+	rt := &_router{
 		router:     router,
 		baseLogger: cfg.Logger,
 		db:         cfg.Database,
-	}, nil
+	}
+
+	// REGISTRIAMO LA NOSTRA ROTTA VULNERABILE QUI:
+	// Quando arriva una GET su /api/users, usa la funzione searchUsers
+	rt.router.GET("/api/users", rt.wrap(rt.searchUsers))
+
+	// Ora possiamo restituire il router completo
+	return rt, nil
+
 }
 
 type _router struct {
