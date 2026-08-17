@@ -1,8 +1,9 @@
-import axios from "src/webui/src/services/axios";
+import axios from 'axios';
 
-const instance = axios.create({
-	baseURL: __API_URL__,
-	timeout: 1000 * 5
+// Creiamo un'istanza di Axios configurata per puntare al nostro server Go
+const api = axios.create({
+	baseURL: 'http://localhost:3000', // L'indirizzo esatto del nostro backend!
+	timeout: 10000,
 });
 
-export default instance;
+export default api;
