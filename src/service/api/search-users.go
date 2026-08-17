@@ -23,7 +23,7 @@ func (rt *_router) searchUsers(w http.ResponseWriter, r *http.Request, ps httpro
 
 	//step 2: La vulnerabilitò; concatenazione brutale delle stringhe !
 
-	sqlQuery := "SELECT id, username, email FROM users WHERE username = ''" + usernameParam + "'"
+	sqlQuery := "SELECT id, username, email FROM users WHERE username = '" + usernameParam + "'"
 
 	//step 3: esecuzione; chiediamo la connessione grezza e lanciamo la query
 
