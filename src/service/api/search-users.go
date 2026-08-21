@@ -1,5 +1,6 @@
 package api
 
+//------------- CODICE VULNERABILE -------------//
 import (
 	"encoding/json"
 	"net/http"
@@ -59,3 +60,59 @@ func (rt *_router) searchUsers(w http.ResponseWriter, r *http.Request, ps httpro
 	json.NewEncoder(w).Encode(result)
 
 }
+
+//---------------------------------------------------------------------------------
+
+//------------- CODICE SICURO -------------//
+/*
+
+import (
+	"encoding/json"
+	"net/http"
+
+	"sicurezza/service/api/reqcontext"
+
+	"github.com/julienschmidt/httprouter"
+)
+
+func (rt *_router) searchUsers(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	w.Header().Set("Content-Type", "application/json")
+
+	var result SearchResult
+	result.Users = make([]User, 0)
+
+	// 1. INPUT: Estraiamo il parametro dall'URL
+	usernameParam := r.URL.Query().Get("username")
+
+	// 2. LA DIFESA (Prepared Statement): Usiamo il segnaposto "?"
+	// Non ci sono più apici o concatenazioni pericolose!
+	sqlQuery := "SELECT id, username, email FROM users WHERE username = ?"
+
+	// 3. ESECUZIONE SICURA: Passiamo la query e il parametro separatamente
+	db := rt.db.GetDB()
+	rows, err := db.Query(sqlQuery, usernameParam)
+
+	if err != nil {
+		result.Error = err.Error()
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(result)
+		return
+	}
+	defer rows.Close()
+
+	// 4. ESTRAZIONE
+	for rows.Next() {
+		var u User
+		if err := rows.Scan(&u.ID, &u.Username, &u.Email); err != nil {
+			rt.baseLogger.WithError(err).Error("Errore durante la lettura di una riga")
+			continue
+		}
+		result.Users = append(result.Users, u)
+	}
+
+	// 5. RISPOSTA
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(result)
+}
+
+*/
