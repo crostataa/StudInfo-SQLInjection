@@ -1,3 +1,19 @@
+<script>
+export default {
+  name: "LoginView"
+}
+</script>
+
+<template>
+
+</template>
+
+<style scoped>
+
+</style>
+
+
+
 <template>
   <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; text-align: center;">
 

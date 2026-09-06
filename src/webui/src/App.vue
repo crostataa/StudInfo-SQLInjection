@@ -1,67 +1,104 @@
-<script setup>
-import { RouterLink, RouterView } from 'vue-router'
-</script>
-<script>
-export default {}
-</script>
-
 <template>
+  <div id="app">
+    <!-- BARRA DI NAVIGAZIONE (Nascosta se siamo sulla pagina di Login: '/') -->
+    <nav v-if="$route.path !== '/'" class="navbar">
+      <div class="nav-brand">
+        <strong>StudInfo</strong>
+      </div>
+      <div class="nav-links">
+        <router-link to="/dashboard" exact-active-class="active">Home</router-link>
+        <router-link to="/dashboard/appelli" exact-active-class="active">Appelli</router-link>
+        <router-link to="/dashboard/prenotazioni" exact-active-class="active">Prenotazioni</router-link>
+        <router-link to="/dashboard/libretto" exact-active-class="active">Libretto</router-link>
+        <router-link to="/dashboard/profilo" exact-active-class="active">Profilo</router-link>
+      </div>
+      <div class="nav-logout">
+        <router-link to="/" class="btn-logout">Esci</router-link>
+      </div>
+    </nav>
 
-	<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-		<a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6" href="#/">Example App</a>
-		<button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-			<span class="navbar-toggler-icon"></span>
-		</button>
-	</header>
-
-	<div class="container-fluid">
-		<div class="row">
-			<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-				<div class="position-sticky pt-3 sidebar-sticky">
-					<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
-						<span>General</span>
-					</h6>
-					<ul class="nav flex-column">
-						<li class="nav-item">
-							<RouterLink to="/" class="nav-link">
-								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#home"/></svg>
-								Home
-							</RouterLink>
-						</li>
-						<li class="nav-item">
-							<RouterLink to="/link1" class="nav-link">
-								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#layout"/></svg>
-								Menu item 1
-							</RouterLink>
-						</li>
-						<li class="nav-item">
-							<RouterLink to="/link2" class="nav-link">
-								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#key"/></svg>
-								Menu item 2
-							</RouterLink>
-						</li>
-					</ul>
-
-					<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
-						<span>Secondary menu</span>
-					</h6>
-					<ul class="nav flex-column">
-						<li class="nav-item">
-							<RouterLink :to="'/some/' + 'variable_here' + '/path'" class="nav-link">
-								<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#file-text"/></svg>
-								Item 1
-							</RouterLink>
-						</li>
-					</ul>
-				</div>
-			</nav>
-
-			<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-				<RouterView />
-			</main>
-		</div>
-	</div>
+    <!-- AREA DEI CONTENUTI -->
+    <!-- Il router-view "inietta" qui dentro la pagina corrispondente all'URL -->
+    <main :class="{ 'main-content': $route.path !== '/' }">
+      <router-view />
+    </main>
+  </div>
 </template>
 
+<script>
+export default {
+  name: 'App'
+}
+</script>
+
 <style>
+/* STILI GLOBALI E DELLA NAVBAR */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f7fa;
+  color: #333;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #812936; /* Rosso sapienza*/
+  color: white;
+  padding: 0 20px;
+  height: 60px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-brand {
+  font-size: 1.2rem;
+  letter-spacing: 0.5px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-links a {
+  color: #a0aec0;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+.nav-links a:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Evidenzia la pagina corrente */
+.nav-links a.active {
+  color: white;
+  background-color: #812936;
+}
+
+.btn-logout {
+  color: #fc8181;
+  text-decoration: none;
+  font-weight: bold;
+  border: 1px solid #fc8181;
+  padding: 5px 15px;
+  border-radius: 20px;
+  transition: all 0.3s;
+}
+
+.btn-logout:hover {
+  background-color: #fc8181;
+  color: #812936;
+}
+
+.main-content {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
 </style>
