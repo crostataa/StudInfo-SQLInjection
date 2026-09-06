@@ -24,3 +24,22 @@ le cose da fare sono tante:
 ### notion
 sto tenendo nota dei progressi riguardanti il progetto sul mio notion:
 https://app.notion.com/p/SICUREZZA-3110dd71b5c6807890f8e764e39a1c86?source=copy_link
+
+### attacchi possibili:
+
+- utente legittimo:<br>
+  `admin`<br>
+  dovrebbe apparire una normale tabella con i dati dell'utente digitato (cioè admin)<br>
+- error-based SQL Injection<br>
+  `'`<br>
+  la tabella sparisce e dovrebbe apparire il box rosso: vuol dire che il database è andato in 'syntax   error',<br>
+  il che ci conferma che l'input non è sanitizzato contro attacchi di questo tipo!<br>
+- tautologia<br>
+  `' OR 1=1 #`<br>
+  il database riceve la stringa spezzata, valuta la condizione 1=1 (cioè sempre vera) e ignora il<br>
+  resto della query grazie a #. L'output è la visione a schermo di una tabella con tutti i dati degli<br>
+  utenti presenti nel database<br>
+- UNION Injection<br>
+  `' UNION SELECT 999, chiave, valore_progetto FROM segreti_aziendali #`<br>
+  dal momento che le tabelle che sto unendo devono avere lo stesso
+  
