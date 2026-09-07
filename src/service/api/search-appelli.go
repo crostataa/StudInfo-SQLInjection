@@ -1,5 +1,13 @@
 package api
 
+import (
+	"encoding/json"
+	"net/http"
+
+	"github.com/julienschmidt/httprouter"
+)
+
+/*
 //------------- CODICE VULNERABILE -------------//
 import (
 	"encoding/json"
@@ -68,37 +76,48 @@ func (rt *_router) searchAppelli(w http.ResponseWriter, r *http.Request, ps http
 	json.NewEncoder(w).Encode(result)
 
 }
-
+*/
 //---------------------------------------------------------------------------------
 
-//------------- CODICE SICURO DA MODIFICARE-------------//
-/*
+//------------- CODICE SICURO -------------//
 
 import (
-	"encoding/json"
-	"net/http"
-
+	_ "fmt"
 	"sicurezza/service/api/reqcontext"
-
-	"github.com/julienschmidt/httprouter"
 )
 
-func (rt *_router) searchUsers(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+// searchUsers è la funzione che risponderà quando qualcuno visita /api/users
+func (rt *_router) searchAppelli(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	// Diciamo al browser che stiamo restituendo dati in formato JSON
 	w.Header().Set("Content-Type", "application/json")
 
-	var result SearchResult
-	result.Users = make([]User, 0)
+	//accetta richieste da qualunque porta, disabilita il CORS
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	//prepariamo la nostra struttura dati (quella creata nel file struct.go)
+	var result AppelliList
+	result.Appelli = make([]Appello, 0) //inizializziamo una lista vuota
 
-	// 1. INPUT: Estraiamo il parametro dall'URL
-	usernameParam := r.URL.Query().Get("username")
+	//step 1:
+	//estraiamo ciò che ha scritto l'utente nella barra di ricerca
 
-	// 2. LA DIFESA (Prepared Statement): Usiamo il segnaposto "?"
-	// Non ci sono più apici o concatenazioni pericolose!
-	sqlQuery := "SELECT id, username, email FROM users WHERE username = ?"
+	queryParam := r.URL.Query().Get("q")
 
-	// 3. ESECUZIONE SICURA: Passiamo la query e il parametro separatamente
+	// step 2: LA DIFESA (Prepared Statement)
+	// Al posto di fmt.Sprintf, mettiamo un segnaposto (?) nella query
+	sqlQuery := "SELECT id, insegnamento, docente, data FROM appelli WHERE insegnamento LIKE ?"
+
+	// Aggiungiamo i simboli % direttamente alla variabile in Go, non in SQL
+	parametroRicerca := "%" + queryParam + "%"
+
+	// step 3: Esecuzione sicura
 	db := rt.db.GetDB()
-	rows, err := db.Query(sqlQuery, usernameParam)
+
+	// Passiamo 'parametroRicerca' come secondo argomento.
+	// Go e MySQL lavoreranno insieme per sterilizzare questo dato!
+	rows, err := db.Query(sqlQuery, parametroRicerca)
+
+	//step 4: error-based SQLi; se il database va in errore, non lo nascondiamo,
+	//ma inviamo l'errore direttamente al frontend dentro al campo "error" del JSON
 
 	if err != nil {
 		result.Error = err.Error()
@@ -108,19 +127,21 @@ func (rt *_router) searchUsers(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 	defer rows.Close()
 
-	// 4. ESTRAZIONE
+	//step 5: estrazione; se la query ha successo, leggiamo gli appello trovati!
 	for rows.Next() {
-		var u User
-		if err := rows.Scan(&u.ID, &u.Username, &u.Email); err != nil {
-			rt.baseLogger.WithError(err).Error("Errore durante la lettura di una riga")
+		var a Appello
+		//mappiamo le 4 colonne chieste nella SELECT (cioè id, insegnamento, docente e data) nei campi della nostra struct (Appello)
+
+		if err := rows.Scan(&a.ID, &a.Insegnamento, &a.Docente, &a.Data); err != nil {
+			rt.baseLogger.WithError(err).Error("Error scanning row")
 			continue
 		}
-		result.Users = append(result.Users, u)
+		result.Appelli = append(result.Appelli, a)
 	}
 
-	// 5. RISPOSTA
+	//step 6: risposta, inviamo il pacchetto JSON completo al client
+
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(result)
-}
 
-*/
+}
