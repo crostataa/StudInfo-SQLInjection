@@ -3,28 +3,36 @@ package api
 //------------- CODICE VULNERABILE -------------//
 import (
 	"encoding/json"
+	"fmt"
+	_ "fmt"
 	"net/http"
-
-	"sicurezza/service/api/reqcontext" // Usiamo il tuo modulo rinominato
+	"sicurezza/service/api/reqcontext"
 
 	"github.com/julienschmidt/httprouter"
 )
 
 // searchUsers è la funzione che risponderà quando qualcuno visita /api/users
-func (rt *_router) searchUsers(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+func (rt *_router) searchAppelli(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// Diciamo al browser che stiamo restituendo dati in formato JSON
 	w.Header().Set("Content-Type", "application/json")
 
+	//accetta richieste da qualunque porta, disabilita il CORS
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	//prepariamo la nostra struttura dati (quella creata nel file struct.go)
-	var result SearchResult
-	result.Users = make([]User, 0) //inizializziamo una lista vuota
+	var result AppelliList
+	result.Appelli = make([]Appello, 0) //inizializziamo una lista vuota
 
-	//step 1: estraiamo il parametro "username" dall'URL (es. ?username=admin)
-	usernameParam := r.URL.Query().Get("username")
+	//step 1:
+	//estraiamo ciò che ha scritto l'utente nella barra di ricerca
 
-	//step 2: La vulnerabilitò; concatenazione brutale delle stringhe !
+	queryParam := r.URL.Query().Get("q")
 
-	sqlQuery := "SELECT id, username, email FROM users WHERE username = '" + usernameParam + "'"
+	//step 2:
+	//Invece di usare le Prepared Statements sicure (?), incolliamo brutalmente
+	//l'input dell'utente dentro la query SQL usando fmt.Sprintf.
+	//Usiamo LIKE per permettere la ricerca parziale (es. cerco "Sicur" e trovo "Sicurezza")
+
+	sqlQuery := fmt.Sprintf("SELECT id, insegnamento, docente, data FROM appelli WHERE insegnamento LIKE '%%%s%%'", queryParam)
 
 	//step 3: esecuzione; chiediamo la connessione grezza e lanciamo la query
 
@@ -42,16 +50,16 @@ func (rt *_router) searchUsers(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 	defer rows.Close()
 
-	//step 5: estrazione; se la query ha successo, leggiamo gli utenti trovati!
+	//step 5: estrazione; se la query ha successo, leggiamo gli appello trovati!
 	for rows.Next() {
-		var u User
-		//mappiamo le 3 colonne chieste nella SELECT (cioè id, username e email) nei campi della nostra struct (User)
+		var a Appello
+		//mappiamo le 4 colonne chieste nella SELECT (cioè id, insegnamento, docente e data) nei campi della nostra struct (Appello)
 
-		if err := rows.Scan(&u.ID, &u.Username, &u.Email); err != nil {
+		if err := rows.Scan(&a.ID, &a.Insegnamento, &a.Docente, &a.Data); err != nil {
 			rt.baseLogger.WithError(err).Error("Error scanning row")
 			continue
 		}
-		result.Users = append(result.Users, u)
+		result.Appelli = append(result.Appelli, a)
 	}
 
 	//step 6: risposta, inviamo il pacchetto JSON completo al client
@@ -63,7 +71,7 @@ func (rt *_router) searchUsers(w http.ResponseWriter, r *http.Request, ps httpro
 
 //---------------------------------------------------------------------------------
 
-//------------- CODICE SICURO -------------//
+//------------- CODICE SICURO DA MODIFICARE-------------//
 /*
 
 import (

@@ -82,10 +82,10 @@ body {
 }
 
 .btn-logout {
-  color: #fc8181;
+  color: #ffffff;
   text-decoration: none;
   font-weight: bold;
-  border: 1px solid #fc8181;
+  border: 1px solid #ffffff;
   padding: 5px 15px;
   border-radius: 20px;
   transition: all 0.3s;
@@ -93,7 +93,7 @@ body {
 
 .btn-logout:hover {
   background-color: #fc8181;
-  color: #812936;
+  color: #ffffff;
 }
 
 .main-content {

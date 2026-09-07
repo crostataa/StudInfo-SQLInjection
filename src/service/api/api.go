@@ -89,7 +89,7 @@ func New(cfg Config) (Router, error) {
 
 	// REGISTRIAMO LA NOSTRA ROTTA VULNERABILE QUI:
 	// Quando arriva una GET su /api/users, usa la funzione searchUsers
-	rt.router.GET("/api/users", rt.wrap(rt.searchUsers))
+	rt.router.GET("/api/appelli", rt.wrap(rt.searchAppelli))
 
 	// Ora possiamo restituire il router completo
 	return rt, nil

@@ -34,8 +34,9 @@
         </thead>
         <tbody>
         <tr v-for="appello in risultati" :key="appello.id">
-          <td>{{ appello.codice }}</td>
-          <td><strong>{{ appello.materia }}</strong></td>
+          <!-- CORREZIONE 3: Usiamo id e insegnamento -->
+          <td>{{ appello.id }}</td>
+          <td><strong>{{ appello.insegnamento }}</strong></td>
           <td>{{ appello.docente }}</td>
           <td>{{ appello.data }}</td>
           <td>
@@ -60,40 +61,42 @@ export default {
       ricerca: '',
       errore: null,
       haCercato: false,
-      // DATI FINTI: simuliamo la risposta del database
-      tuttiAppelli: [
-        { id: 1, codice: 'INF01', materia: 'Sicurezza Informatica', docente: 'Prof. Hacker', data: '15/10/2026' },
-        { id: 2, codice: 'INF02', materia: 'Basi di Dati', docente: 'Prof. Query', data: '22/10/2026' },
-        { id: 3, codice: 'MAT01', materia: 'Analisi Matematica', docente: 'Prof. Integrale', data: '10/11/2026' }
-      ],
       risultati: []
     }
   },
+
   mounted() {
     // Mostriamo subito tutti gli appelli di default
-    this.risultati = this.tuttiAppelli;
+    this.cercaAppelli();
   },
   methods: {
-    cercaAppelli() {
+    async cercaAppelli() {
       this.haCercato = true;
       this.errore = null;
+      this.risultati = [];
 
-      // MOCKUP: Simuliamo una ricerca finta filtrando l'array Javascript
-      // Nella fase 3 sostituiremo questo con la vera chiamata Axios al server Go!
-      if (this.ricerca.trim() === '') {
-        this.risultati = this.tuttiAppelli;
-      } else {
-        const query = this.ricerca.toLowerCase();
-        this.risultati = this.tuttiAppelli.filter(a =>
-            a.materia.toLowerCase().includes(query)
-        );
+      try {
+        const url = 'http://127.0.0.1:3000/api/appelli?q=' + encodeURIComponent(this.ricerca);
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.error) {
+          this.errore = data.error;
+        } else {
+          // CORREZIONE 1: data.appelli (al plurale, come la struct in Go)
+          this.risultati = data.appelli || [];
+        }
+      } catch (err) {
+        // CORREZIONE 2: Stampiamo il vero errore invece di un testo fisso
+        this.errore = "Errore reale: " + err.message;
       }
-    },
+  },
     prenota(id) {
-      alert("Mockup: Hai prenotato l'appello con ID: " + id + ". Nella versione finale, questo salverà i dati nel DB!");
+      alert("funzione di prenotazione in costruzione! ID: " + id);
     }
   }
 }
+
 </script>
 
 <style scoped>
