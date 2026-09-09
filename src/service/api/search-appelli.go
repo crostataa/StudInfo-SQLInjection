@@ -7,16 +7,11 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-/*
 //------------- CODICE VULNERABILE -------------//
 import (
-	"encoding/json"
 	"fmt"
 	_ "fmt"
-	"net/http"
 	"sicurezza/service/api/reqcontext"
-
-	"github.com/julienschmidt/httprouter"
 )
 
 // searchUsers è la funzione che risponderà quando qualcuno visita /api/users
@@ -76,7 +71,8 @@ func (rt *_router) searchAppelli(w http.ResponseWriter, r *http.Request, ps http
 	json.NewEncoder(w).Encode(result)
 
 }
-*/
+
+/*
 //---------------------------------------------------------------------------------
 
 //------------- CODICE SICURO -------------//
@@ -145,3 +141,4 @@ func (rt *_router) searchAppelli(w http.ResponseWriter, r *http.Request, ps http
 	json.NewEncoder(w).Encode(result)
 
 }
+*/
