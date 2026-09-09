@@ -48,18 +48,18 @@ const (
 )
 
 type Prenotazione struct {
-	id_prenotazione int    `json:"id_prenotazione"`
-	matricola       int    `json:"matricola"`
-	id_appello      int    `json:"id_appello"`
-	insegnamento    int    `json:"insegnamento"`
-	data_esame      string `json:"data_esame"`
-	aula            string `json:"aula"`
-	stato           Stato  `json:"stato"`
+	Id_prenotazione int    `json:"id_prenotazione"`
+	Matricola       int    `json:"matricola"`
+	Id_appello      int    `json:"id_appello"`
+	Insegnamento    string `json:"insegnamento"`
+	Data_esame      string `json:"data_esame"`
+	Aula            string `json:"aula"`
+	Stato           Stato  `json:"stato"`
 }
 
 type PrenotazioniList struct {
 	Prenotazione []Prenotazione `json:"prenotazione"`
-	Error        string         `json:"error, omitempty"`
+	Error        string         `json:"error,omitempty"`
 }
 
 //-----------------------

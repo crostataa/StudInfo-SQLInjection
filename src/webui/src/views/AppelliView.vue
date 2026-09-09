@@ -3,7 +3,7 @@
     <h2>Ricerca Appelli d'Esame</h2>
     <p class="subtitle">Cerca l'insegnamento per visualizzare le date disponibili e prenotarti.</p>
 
-    <!-- BARRA DI RICERCA (Qui avverrà la magia oscura in Fase 4) -->
+    <!-- BARRA DI RICERCA -->
     <div class="search-box">
       <input
           type="text"
