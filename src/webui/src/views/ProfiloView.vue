@@ -3,13 +3,24 @@
     <h2>Profilo Personale</h2>
     <p class="subtitle">I tuoi dati anagrafici e di immatricolazione.</p>
 
-    <div class="profile-card">
-      <div class="profile-row"><strong>Nome:</strong> Mario</div>
-      <div class="profile-row"><strong>Cognome:</strong> Rossi</div>
-      <div class="profile-row"><strong>Matricola:</strong> 123456</div>
-      <div class="profile-row"><strong>Data di Nascita:</strong> 15/05/2001</div>
-      <div class="profile-row"><strong>Indirizzo:</strong> Via delle Scienze 42, Roma</div>
-      <div class="profile-row"><strong>Email Istituzionale:</strong> mario.rossi@studenti.uni.it</div>
+    <!-- BOX ERRORE (Nascosto se va tutto bene) -->
+    <div v-if="errore" class="error-box" style="color: red; margin-bottom: 15px;">
+      <strong>⚠️ Errore:</strong> {{ errore }}
+    </div>
+
+    <!-- CARD DEL PROFILO (Si mostra solo quando i dati sono stati scaricati) -->
+    <div v-if="profilo" class="profile-card">
+      <div class="profile-row"><strong>Nome:</strong> {{ profilo.nome }}</div>
+      <div class="profile-row"><strong>Cognome:</strong> {{ profilo.cognome }}</div>
+      <div class="profile-row"><strong>Matricola:</strong> {{ profilo.matricola }}</div>
+      <div class="profile-row"><strong>Data di Nascita:</strong> {{ profilo.data_di_nascita }}</div>
+      <div class="profile-row"><strong>Indirizzo:</strong> {{ profilo.indirizzo }}</div>
+      <div class="profile-row"><strong>Email Istituzionale:</strong> {{ profilo.email }}</div>
+    </div>
+
+    <!-- MESSAGGIO DI CARICAMENTO -->
+    <div v-else-if="!errore">
+      <p>Caricamento dati profilo in corso...</p>
     </div>
   </div>
 </template>

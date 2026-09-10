@@ -26,7 +26,7 @@
         <thead>
         <tr>
           <th>Id prenotazione</th>
-          <th>Matricola</th>
+          <!-- COLONNA MATRICOLA RIMOSSA -->
           <th>Id appello</th>
           <th>Insegnamento</th>
           <th>Data esame</th>
@@ -37,16 +37,16 @@
         </thead>
         <tbody>
         <tr v-for="prenotazione in risultati" :key="prenotazione.id_prenotazione">
-          <!-- CORREZIONE 3: Usiamo id e insegnamento -->
           <td>{{ prenotazione.id_prenotazione }}</td>
-          <td><strong>{{ prenotazione.matricola }}</strong></td>
+          <!-- DATO MATRICOLA RIMOSSO -->
           <td>{{ prenotazione.id_appello }}</td>
-          <td>{{prenotazione.insegnamento}}</td>
-          <td>{{prenotazione.data_esame}}</td>
-          <td>{{prenotazione.aula}}</td>
-          <td>{{prenotazione.stato}}</td>
+          <td>{{ prenotazione.insegnamento }}</td>
+          <td>{{ prenotazione.data_esame }}</td>
+          <td>{{ prenotazione.aula }}</td>
+          <td>{{ prenotazione.stato }}</td>
           <td>
-            <button class="btn-book" @click="prenota(prenotazione.id)">Prenota</button>
+            <!-- (Nota: se queste sono le prenotazioni già effettuate, potresti voler rinominare il bottone in "Annulla" anziché "Prenota"!) -->
+            <button class="btn-book" @click="annulla(prenotazione.id)">Annulla</button>
           </td>
         </tr>
         </tbody>
@@ -73,41 +73,42 @@ export default {
 mounted() {
     this.cercaPrenotazioni();
 },
-methods: {
-  async cercaPrenotazioni() {
-    this.haCercato = true;
-    this.errore = null;
-    this.risultati = [];
+  methods: {
+    async cercaPrenotazioni() {
+      // 1. Prendi la matricola e resetta gli errori precedenti
+      const matricola = localStorage.getItem('utente_loggato');
+      this.errore = null;
+      this.haCercato = true;
 
-    try {
+      if (!matricola) {
+        this.errore = "Devi effettuare l'accesso per vedere le prenotazioni!";
+        return;
+      }
 
-      const url = 'http://127.0.0.1:3000/api/prenotazioni?q=' + encodeURIComponent(this.ricerca.trim());
-      const response = await fetch(url);
-
-      // 1. Leggiamo la risposta come testo grezzo prima di tutto
-      const textResponse = await response.text();
-
-      let data;
       try {
-        // 2. Tentiamo il parsing manuale
-        data = JSON.parse(textResponse);
-      } catch (parseErr) {
-        // Se il parsing fallisce, stampiamo a video cosa ha risposto il server
-        throw new Error(`Il server non ha risposto in JSON. Risposta del server: "${textResponse}"`);
-      }
+        // 2. Chiamata al server Go
+        const url = `http://127.0.0.1:3000/api/prenotazioni?q=${this.ricerca}&matricola=${matricola}`;
+        const response = await fetch(url);
+        const data = await response.json();
 
-      if (data.error) {
-        this.errore = data.error;
-      } else {
+        // 3. Gestione dei dati
+        if (data.error) {
+          // Se Go ci manda un errore (es. SQL Injection fail), lo mostriamo
+          this.errore = data.error;
+          this.risultati = [];
+        } else if (data.prenotazione) {
+          // Se ci sono risultati, popoliamo la tabella
+          this.risultati = data.prenotazione;
+        } else {
+          this.risultati = [];
+        }
 
-        this.risultati = data.prenotazione || [];
+      } catch (err) {
+        this.errore = "Errore di connessione al server: " + err.message;
       }
-    } catch (err) {
-      this.errore = "Errore reale: " + err.message;
-    }
-  },
-  prenota(id) {
-    alert("funzione di prenotazione in costruzione! ID: " + id);
+    },
+  annulla(id) {
+    alert("funzione di cancellazione in costruzione! ID: " + id);
   }
 }
 }

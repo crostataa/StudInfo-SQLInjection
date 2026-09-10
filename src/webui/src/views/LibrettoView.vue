@@ -3,7 +3,13 @@
     <h2>Libretto Universitario</h2>
     <p class="subtitle">Riepilogo della tua carriera accademica.</p>
 
-    <table class="data-table">
+    <!-- BOX ERRORE (Nascosto se va tutto bene) -->
+    <div v-if="errore" class="error-box" style="color: red; margin-bottom: 15px;">
+      <strong>⚠️ Errore:</strong> {{ errore }}
+    </div>
+
+    <!-- TABELLA (Mostrata se ci sono esami caricati) -->
+    <table v-if="esami && esami.length > 0" class="data-table">
       <thead>
       <tr>
         <th>Insegnamento</th>
@@ -13,14 +19,22 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="esame in esami" :key="esame.id">
-        <td><strong>{{ esame.materia }}</strong></td>
-        <td>{{ esame.data }}</td>
+      <!-- Usiamo id_appello come chiave univoca -->
+      <tr v-for="esame in esami" :key="esame.id_appello">
+        <!-- Usiamo i nomi esatti che arrivano da Go -->
+        <td><strong>{{ esame.insegnamento }}</strong></td>
+        <td>{{ esame.data_registrazione }}</td>
         <td><span class="voto">{{ esame.voto }}</span></td>
         <td>{{ esame.cfu }}</td>
       </tr>
       </tbody>
     </table>
+
+    <!-- MESSAGGIO SE IL LIBRETTO E' VUOTO (Nessun esame dato) -->
+    <div v-else-if="!errore && esami.length === 0">
+      <p>Nessun esame registrato a libretto.</p>
+    </div>
+
   </div>
 </template>
 
@@ -28,21 +42,30 @@
 export default {
   name: 'LibrettoView',
   data() {
-    return { esami: [], errore: null }
+    return {
+      esami: [],   // Array vuoto che conterrà gli esami
+      errore: null
+    };
   },
   async mounted() {
     const matricola = localStorage.getItem('utente_loggato');
-    if (!matricola) return;
+
+    if (!matricola) {
+      this.errore = "Devi effettuare l'accesso per vedere il libretto.";
+      return;
+    }
 
     try {
       const response = await fetch(`http://127.0.0.1:3000/api/libretto/${matricola}`);
       const data = await response.json();
 
-      if (data.libretto) {
-        this.esami = data.libretto;
+      if (data.error) {
+        this.errore = data.error;
+      } else if (data.libretto) {
+        this.esami = data.libretto; // Salviamo la lista degli esami
       }
     } catch (err) {
-      this.errore = "Impossibile caricare il libretto";
+      this.errore = "Errore durante il caricamento del libretto.";
     }
   }
 }

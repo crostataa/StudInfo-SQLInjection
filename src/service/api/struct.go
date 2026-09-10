@@ -67,10 +67,10 @@ type PrenotazioniList struct {
 type Libretto struct {
 	Matricola          int    `json:"matricola"`
 	Id_appello         int    `json:"id_appello"`
-	Insegnamento       int    `json:"insegnamento"`
+	Insegnamento       string `json:"insegnamento"`
 	Data_registrazione string `json:"data_registrazione"`
 	Voto               int    `json:"voto"`
-	CFU                string `json:"cfu"`
+	CFU                int    `json:"cfu"`
 }
 
 type LibrettoList struct {

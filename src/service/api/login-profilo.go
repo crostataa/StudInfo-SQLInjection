@@ -102,6 +102,7 @@ func (rt *_router) getLibretto(w http.ResponseWriter, r *http.Request, ps httpro
 	for rows.Next() {
 		var l Libretto
 		if err := rows.Scan(&l.Matricola, &l.Id_appello, &l.Insegnamento, &l.Data_registrazione, &l.Voto, &l.CFU); err != nil {
+			fmt.Println("Errore lettura database", err)
 			continue
 		}
 		res.Libretto = append(res.Libretto, l)

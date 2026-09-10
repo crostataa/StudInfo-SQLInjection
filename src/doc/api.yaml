@@ -1,273 +1,194 @@
 openapi: 3.0.0
 servers:
-  - url: "http://localhost:3000"
+  - url: "http://localhost:3000/api"
 info:
-  title: Fantastic Coffee (decaffeinated)
-  description: Fantastic Coffee (decaffeinated), the skeleton project for Web and Software architecture course
+  title: Portale Studenti Sapienza (Vulnerabile per Test)
+  description: API RESTful per la gestione della carriera universitaria (Profilo, Libretto, Prenotazioni), con vulnerabilità SQL Injection intenzionali per scopi didattici.
   version: 1.0.0
 paths:
-  /status:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-    get:
-      tags: ["General"]
-      operationId: getStatusMessage
-      summary: Get status message for the user about issues / updates
+  /login:
+    post:
+      tags: ["Autenticazione"]
+      operationId: doLogin
+      summary: Effettua il login al portale (VULNERABILE a SQLi)
       description: |-
-        The response contains a status message meant for the user. It might
-        contains information about current technical issues, update messages
-        or general information.
+        Endpoint per l'autenticazione dello studente.
+        **Vulnerabilità:** Intenzionalmente suscettibile ad attacchi di Tautologia SQL Injection nel campo password.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - matricola
+                - password
+              properties:
+                matricola:
+                  type: integer
+                  description: La matricola dello studente
+                  example: 2112808
+                password:
+                  type: string
+                  description: La password (o payload SQLi)
+                  example: "Sapienza123$"
       responses:
         "200":
-          description: Status message available
+          description: Login completato
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StatusInfo"
+                $ref: "#/components/schemas/LoginResponse"
         "400": { $ref: "#/components/responses/BadRequest" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /:
-    get:
-      tags: ["Group 1"]
-      operationId: index
-      summary: Get an index
-      description: |-
-        This is an example of an index API description
-      responses:
-        "200":
-          description: Successful
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-  /context:
+  /profilo/{matricola}:
     parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-    post:
-      tags: ["Group 1"]
-      operationId: getContext
-      summary: Another API example
-      description: |-
-        Example description 2
-      responses:
-        "200":
-          description: Request ok
-          headers:
-            X-Access-Token:
-              description: Access token for authenticated requests
-              schema: { type: string }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-  /authenticated:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
+      - $ref: "#/components/parameters/PathMatricola"
     get:
-      tags: ["Group 2"]
-      operationId: getAuthenticatedExample
-      summary: Get an endpoint with authentication
-      description: |-
-        Get an endpoint with auth
-      security:
-        - LegacyAuth: []
-        - AppToken: []
+      tags: ["Dati Studente"]
+      operationId: getProfilo
+      summary: Recupera i dati anagrafici dello studente
+      description: Restituisce nome, cognome, indirizzo, email e data di nascita legati a una specifica matricola.
       responses:
         "200":
-          description: Logout successful
-        "500": { $ref: "#/components/responses/InternalServerError" }
-
-  /pictures/{cat}:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-      - $ref: "#/components/parameters/cat"
-    get:
-      tags: ["Cat pictures"]
-      operationId: getCatFromPicture
-      summary: Example of a parameter in URL
-      description: |-
-        Example of a parameter in URL
-      security:
-        - LegacyAuth: []
-      responses:
-        "200":
-          description: Student picture found
+          description: Profilo recuperato con successo
           content:
-            image/png:
+            application/json:
               schema:
-                type: string
-                format: binary
-              example: Picture binary file
-        "404":
-          description: Student picture not found
-        "500": { $ref: "#/components/responses/InternalServerError" }
-
-
-  /autofeeder/{cat}:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-      - $ref: "#/components/parameters/cat"
-    put:
-      tags: ["Autofeeder"]
-      operationId: createCatAutofeeder
-      summary: Example of PUT operation
-      security:
-        - LegacyAuth: []
-      responses:
-        "200":
-          description: Auto feed enabled
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-    delete:
-      tags: ["Autofeeder"]
-      operationId: deleteCatAutofeeder
-      summary: Example of DELETE operation
-      security:
-        - LegacyAuth: []
-      responses:
-        "200":
-          description: Auto feed disabled
+                $ref: "#/components/schemas/ProfiloResponse"
         "400": { $ref: "#/components/responses/BadRequest" }
         "500": { $ref: "#/components/responses/InternalServerError" }
 
-  /session/login:
+  /libretto/{matricola}:
     parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-    post:
-      tags: ["Session management"]
-      operationId: login
-      summary: Log-in into system
+      - $ref: "#/components/parameters/PathMatricola"
+    get:
+      tags: ["Dati Studente"]
+      operationId: getLibretto
+      summary: Recupera gli esami superati
+      description: Restituisce la lista degli esami registrati a libretto con relativi voti e CFU per il calcolo della media.
+      responses:
+        "200":
+          description: Libretto recuperato con successo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LibrettoResponse"
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "500": { $ref: "#/components/responses/InternalServerError" }
+
+  /prenotazioni:
+    get:
+      tags: ["Gestione Appelli"]
+      operationId: searchPrenotazioni
+      summary: Cerca le prenotazioni dello studente (VULNERABILE a SQLi)
       description: |-
-        Perform a log-in action using username and password credentials.
-        Returns a token which can be used in authenticated requests.
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              properties:
-                userid:
-                  type: string
-                  pattern: '^[a-zA-Z0-9]+$'
-                  minLength: 3
-                  maxLength: 255
-                password:
-                  type: string
-                  pattern: '^.*?$'
-                  minLength: 8
-                  maxLength: 255
+        Recupera gli appelli a cui lo studente si è prenotato, permettendo la ricerca per nome insegnamento.
+        **Vulnerabilità:** Il parametro di ricerca `q` è intenzionalmente vulnerabile a Error-Based SQL Injection.
+      parameters:
+        - name: matricola
+          in: query
+          required: true
+          description: Matricola dell'utente loggato per filtrare i risultati
+          schema:
+            type: integer
+        - name: q
+          in: query
+          required: false
+          description: Testo per filtrare gli insegnamenti
+          schema:
+            type: string
       responses:
         "200":
-          description: Login successful
-          headers:
-            X-Access-Token:
-              description: Access token for authenticated requests
-              schema: { type: string }
+          description: Ricerca completata con successo (o errore SQL stampato a video)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrenotazioniResponse"
         "400": { $ref: "#/components/responses/BadRequest" }
-        "403":
-          description: Login failed
-          headers:
-            X-Message:
-              description: Error message
-              schema: { type: string }
         "500": { $ref: "#/components/responses/InternalServerError" }
-
 
 components:
   schemas:
-    StatusInfo:
-      title: Status Info
+    # --- Modelli di Risposta ---
+    LoginResponse:
       type: object
       properties:
-        status:
+        success:
+          type: boolean
+        error:
           type: string
-          enum:
-            - info
-            - warning
-            - critical
-            - ""
-        title: { type: string }
-        message: { type: string }
-        url: { type: string }
+        matricola:
+          type: integer
+        nome:
+          type: string
+        cognome:
+          type: string
+
+    ProfiloResponse:
+      type: object
+      properties:
+        studente:
+          type: array
+          items:
+            type: object
+            properties:
+              matricola: { type: integer }
+              nome: { type: string }
+              cognome: { type: string }
+              data_di_nascita: { type: string }
+              indirizzo: { type: string }
+              email: { type: string }
+        error:
+          type: string
+
+    LibrettoResponse:
+      type: object
+      properties:
+        libretto:
+          type: array
+          items:
+            type: object
+            properties:
+              matricola: { type: integer }
+              id_appello: { type: integer }
+              insegnamento: { type: string }
+              data_registrazione: { type: string }
+              voto: { type: integer }
+              cfu: { type: integer }
+        error:
+          type: string
+
+    PrenotazioniResponse:
+      type: object
+      properties:
+        prenotazione:
+          type: array
+          items:
+            type: object
+            properties:
+              id_prenotazione: { type: integer }
+              id_appello: { type: integer }
+              insegnamento: { type: string }
+              data_esame: { type: string }
+              aula: { type: string }
+              stato: { type: string }
+        error:
+          type: string
+          description: Contiene l'eventuale errore SQL stampato a video per l'attacco Error-Based.
 
   responses:
-    Unauthorized:
-      description: The access token is missing or it's expired
     BadRequest:
-      description: The request was not compliant with the documentation (eg. missing fields, etc)
+      description: Parametri mancanti o non validi.
     InternalServerError:
-      description: The server encountered an internal error. Further info in server logs
-
-  securitySchemes:
-    LegacyAuth:
-      type: apiKey
-      in: header
-      name: X-App-Token
-      description: |-
-        App session token value. This value is sent by the server in the login
-        and session refresh APIs.
+      description: Errore interno del server o del database.
 
   parameters:
-    XAppVersion:
-      schema:
-        type: string
-        pattern: '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
-        minLength: 1
-        maxLength: 10
-      name: X-App-Version
-      in: header
-      required: true
-      description: App human readable version ("semantic version" format)
-      allowEmptyValue: false
-    XAppBuild:
-      schema: { type: integer }
-      name: X-App-Build
-      in: header
-      required: true
-      description: App build number
-      allowEmptyValue: false
-    XAppLanguage:
-      schema:
-        type: string
-        pattern: '^[a-z]{2}([-_][A-Z]{2})?$'
-        minLength: 2
-        maxLength: 5
-      name: X-App-Language
-      in: header
-      required: true
-      description: App language in ISO 639-1 format
-      allowEmptyValue: false
-    XAppPlatform:
-      schema:
-        type: string
-        enum: [ios, android]
-      name: X-App-Platform
-      in: header
-      required: true
-      description: App operating system / platform
-      allowEmptyValue: false
-    cat:
-      schema:
-        type: string
-        pattern: '^[a-zA-Z]+$'
-        minLength: 3
-        maxLength: 10
-      name: cat
+    PathMatricola:
+      name: matricola
       in: path
       required: true
-      description: Cat
-      allowEmptyValue: false
+      description: La matricola dello studente
+      schema:
+        type: integer

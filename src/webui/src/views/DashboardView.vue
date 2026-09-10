@@ -1,49 +1,63 @@
 <template>
   <div class="dashboard">
-    <header class="dashboard-header">
-      <h2>Benvenuta/o, {{ studente.nome }} {{ studente.cognome }}</h2>
-      <p class="matricola">Matricola: {{ studente.matricola }}</p>
-    </header>
 
-    <!-- Riepilogo Statistiche -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <h3>Media Ponderata</h3>
-        <div class="stat-value">{{ statistiche.media }}</div>
+    <!-- Avviso in caso di errore -->
+    <div v-if="errore" class="error-box" style="color: red; margin-bottom: 15px;">
+      <strong>⚠️ Errore:</strong> {{ errore }}
+    </div>
+
+    <!-- Mostriamo la dashboard solo a caricamento completato -->
+    <div v-if="!caricamento">
+      <header class="dashboard-header">
+        <h2>Benvenuta/o, {{ studente.nome }} {{ studente.cognome }}</h2>
+        <p class="matricola">Matricola: {{ studente.matricola }}</p>
+      </header>
+
+      <!-- Riepilogo Statistiche -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>Media Ponderata</h3>
+          <div class="stat-value">{{ statistiche.media }}</div>
+        </div>
+        <div class="stat-card">
+          <h3>CFU Acquisiti</h3>
+          <div class="stat-value">{{ statistiche.cfu }} / 120</div>
+        </div>
+        <div class="stat-card">
+          <h3>Esami Sostenuti</h3>
+          <div class="stat-value">{{ statistiche.esamiSostenuti }}</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <h3>CFU Acquisiti</h3>
-        <div class="stat-value">{{ statistiche.cfu }} / 120</div>
-      </div>
-      <div class="stat-card">
-        <h3>Esami Sostenuti</h3>
-        <div class="stat-value">{{ statistiche.esamiSostenuti }}</div>
+
+      <!-- Prossimi impegni (Prenotazioni) -->
+      <div class="upcoming-section">
+        <h3>I tuoi prossimi appelli</h3>
+        <table class="data-table" v-if="prossimiAppelli.length > 0">
+          <thead>
+          <tr>
+            <th>Insegnamento</th>
+            <th>Data Esame</th>
+            <th>Aula</th>
+            <th>Stato</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr v-for="appello in prossimiAppelli" :key="appello.id_prenotazione">
+            <td><strong>{{ appello.insegnamento }}</strong></td>
+            <td>{{ appello.data_esame }}</td>
+            <td>{{ appello.aula }}</td>
+            <td>{{ appello.stato }}</td>
+          </tr>
+          </tbody>
+        </table>
+        <p v-else class="no-data">Non hai appelli prenotati a breve.</p>
       </div>
     </div>
 
-    <!-- Prossimi impegni -->
-    <div class="upcoming-section">
-      <h3>I tuoi prossimi appelli</h3>
-      <table class="data-table" v-if="prossimiAppelli.length > 0">
-        <thead>
-        <tr>
-          <th>Materia</th>
-          <th>Data</th>
-          <th>Ora</th>
-          <th>Aula</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr v-for="appello in prossimiAppelli" :key="appello.id">
-          <td><strong>{{ appello.materia }}</strong></td>
-          <td>{{ appello.data }}</td>
-          <td>{{ appello.ora }}</td>
-          <td>{{ appello.aula }}</td>
-        </tr>
-        </tbody>
-      </table>
-      <p v-else class="no-data">Non hai appelli prenotati a breve.</p>
+    <div v-else>
+      <p>Caricamento della dashboard in corso...</p>
     </div>
+
   </div>
 </template>
 
@@ -52,21 +66,74 @@ export default {
   name: 'DashboardView',
   data() {
     return {
-      // DATI FINTI PER IL MOCKUP (Nella Fase 3 arriveranno dal database MySQL)
+      caricamento: true,
+      errore: null,
       studente: {
-        nome: 'Mario',
-        cognome: 'Rossi',
-        matricola: '123456'
+        nome: '',
+        cognome: '',
+        matricola: ''
       },
       statistiche: {
-        media: '27.5',
-        cfu: 85,
-        esamiSostenuti: 10
+        media: '0.00',
+        cfu: 0,
+        esamiSostenuti: 0
       },
-      prossimiAppelli: [
-        { id: 1, materia: 'Sicurezza Informatica', data: '15/10/2026', ora: '09:00', aula: 'Aula Magna' },
-        { id: 2, materia: 'Basi di Dati', data: '22/10/2026', ora: '14:30', aula: 'Laboratorio 3' }
-      ]
+      prossimiAppelli: []
+    }
+  },
+  async mounted() {
+    const matricola = localStorage.getItem('utente_loggato');
+
+    if (!matricola) {
+      this.errore = "Nessun utente loggato. Effettua l'accesso.";
+      this.caricamento = false;
+      return;
+    }
+
+    try {
+      // 1. PRENDIAMO I DATI DEL PROFILO
+      const resProfilo = await fetch(`http://127.0.0.1:3000/api/profilo/${matricola}`);
+      const dataProfilo = await resProfilo.json();
+      if (dataProfilo.studente && dataProfilo.studente.length > 0) {
+        this.studente = dataProfilo.studente[0];
+      }
+
+      // 2. PRENDIAMO IL LIBRETTO E CALCOLIAMO LE STATISTICHE
+      const resLibretto = await fetch(`http://127.0.0.1:3000/api/libretto/${matricola}`);
+      const dataLibretto = await resLibretto.json();
+
+      if (dataLibretto.libretto) {
+        const esami = dataLibretto.libretto;
+        this.statistiche.esamiSostenuti = esami.length;
+
+        let sommaCfu = 0;
+        let sommaVotiPonderati = 0;
+
+        // Calcolo della media ponderata: (Voto * CFU) / (Totale CFU)
+        esami.forEach(esame => {
+          sommaCfu += esame.cfu;
+          sommaVotiPonderati += (esame.voto * esame.cfu);
+        });
+
+        this.statistiche.cfu = sommaCfu;
+        if (sommaCfu > 0) {
+          // Arrotonda a due cifre decimali
+          this.statistiche.media = (sommaVotiPonderati / sommaCfu).toFixed(2);
+        }
+      }
+
+      // 3. PRENDIAMO LE PRENOTAZIONI FUTURE
+      const resPrenotazioni = await fetch(`http://127.0.0.1:3000/api/prenotazioni?q=&matricola=${matricola}`);
+      const dataPrenotazioni = await resPrenotazioni.json();
+
+      if (dataPrenotazioni.prenotazione) {
+        this.prossimiAppelli = dataPrenotazioni.prenotazione;
+      }
+
+    } catch (err) {
+      this.errore = "Impossibile caricare la dashboard: " + err.message;
+    } finally {
+      this.caricamento = false; // Togliamo la scritta di caricamento
     }
   }
 }
