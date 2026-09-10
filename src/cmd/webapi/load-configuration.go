@@ -19,15 +19,11 @@ type WebAPIConfiguration struct {
 	}
 	Web struct {
 		APIHost         string        `conf:"default:0.0.0.0:3000"`
-		DebugHost       string        `conf:"default:0.0.0.0:4000"`
 		ReadTimeout     time.Duration `conf:"default:5s"`
 		WriteTimeout    time.Duration `conf:"default:5s"`
 		ShutdownTimeout time.Duration `conf:"default:5s"`
 	}
 	Debug bool
-	DB    struct {
-		Filename string `conf:"default:/tmp/decaf.db"`
-	}
 }
 
 // loadConfiguration creates a WebAPIConfiguration starting from flags, environment variables and configuration file.

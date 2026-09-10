@@ -28,12 +28,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"sicurezza/service/api"
 	"sicurezza/service/database"
@@ -62,8 +60,6 @@ func main() {
 // * waits for any termination event: SIGTERM signal (UNIX), non-recoverable server error, etc.
 // * closes the principal web server
 func run() error {
-
-	rand.Seed(time.Now().UnixNano())
 	// Load Configuration and defaults
 	cfg, err := loadConfiguration()
 	if err != nil {
