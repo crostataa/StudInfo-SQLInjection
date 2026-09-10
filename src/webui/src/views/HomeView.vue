@@ -1,26 +1,9 @@
-<script>
-export default {
-  name: "LoginView"
-}
-</script>
-
-<template>
-
-</template>
-
-<style scoped>
-
-</style>
-
-
-
 <template>
   <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; text-align: center;">
 
     <h2>Ricerca Dipendenti Aziendali</h2>
     <p>Inserisci l'username del dipendente per visualizzare i suoi dati.</p>
 
-    <!-- BARRA DI RICERCA -->
     <div style="margin-bottom: 30px;">
       <input
           v-model="username"
@@ -36,19 +19,18 @@ export default {
       </button>
     </div>
 
-    <!-- BOX ERRORE SQL INJECTION (Sfondo rosso) -->
+    <!-- Visualizzazione errore SQL (Error-Based SQLi) -->
     <div v-if="errore" style="background-color: #ffe6e6; color: #d8000c; padding: 15px; border: 1px solid #d8000c; border-radius: 5px; margin-bottom: 20px; text-align: left;">
       <strong>⚠️ ATTENZIONE - Errore del Database:</strong><br><br>
       <span style="font-family: monospace;">{{ errore }}</span>
     </div>
 
-    <!-- TABELLA DEI RISULTATI -->
     <table v-if="utenti.length > 0" style="width: 100%; border-collapse: collapse; text-align: left;">
       <thead>
       <tr style="background-color: #f2f2f2;">
         <th style="padding: 12px; border: 1px solid #ddd;">ID</th>
         <th style="padding: 12px; border: 1px solid #ddd;">Username</th>
-        <th style="padding: 12px; border: 1px solid #ddd;">Email (o Segreto!)</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">Email</th>
       </tr>
       </thead>
       <tbody>
@@ -67,7 +49,6 @@ export default {
 </template>
 
 <script>
-// Importiamo il file axios.js che abbiamo sistemato nel passo precedente!
 import api from '../services/axios.js';
 
 export default {
@@ -83,28 +64,24 @@ export default {
     async cercaUtente() {
       if (!this.username) return;
 
-      // Resettiamo la pagina prima di ogni nuova ricerca
       this.utenti = [];
       this.errore = null;
       this.haCercato = true;
 
       try {
-        // Chiamata HTTP al nostro backend Go!
         const response = await api.get('/api/users', {
           params: { username: this.username }
         });
 
-        // Se il backend ci restituisce l'errore SQL, lo salviamo per mostrarlo nel box rosso
         if (response.data.error) {
+          // Espone l'errore SQL restituito dal server
           this.errore = response.data.error;
-        }
-        // Altrimenti salviamo gli utenti
-        else if (response.data.users) {
+        } else if (response.data.users) {
           this.utenti = response.data.users;
         }
       } catch (err) {
         console.error("Errore API:", err);
-        this.errore = "Impossibile contattare il backend. Hai acceso il server Go (go run)?";
+        this.errore = "Impossibile contattare il backend. Verifica che il server Go sia avviato.";
       }
     }
   }

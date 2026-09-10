@@ -3,7 +3,6 @@
     <h2>Ricerca Appelli d'Esame</h2>
     <p class="subtitle">Cerca l'insegnamento per visualizzare le date disponibili e prenotarti.</p>
 
-    <!-- BARRA DI RICERCA -->
     <div class="search-box">
       <input
           type="text"
@@ -14,13 +13,12 @@
       <button @click="cercaAppelli" class="btn-search">Cerca</button>
     </div>
 
-    <!-- BOX ERRORE SQL INJECTION (Nascosto, si attiverà in Fase 4) -->
+    <!-- Visualizzazione errore SQL (Error-Based SQLi) -->
     <div v-if="errore" class="error-box">
       <strong>⚠️ Errore di sistema:</strong><br>
       <span>{{ errore }}</span>
     </div>
 
-    <!-- TABELLA RISULTATI -->
     <div v-if="risultati.length > 0" class="results-section">
       <table class="data-table">
         <thead>
@@ -34,7 +32,6 @@
         </thead>
         <tbody>
         <tr v-for="appello in risultati" :key="appello.id">
-          <!-- CORREZIONE 3: Usiamo id e insegnamento -->
           <td>{{ appello.id }}</td>
           <td><strong>{{ appello.insegnamento }}</strong></td>
           <td>{{ appello.docente }}</td>
@@ -66,7 +63,7 @@ export default {
   },
 
   mounted() {
-    // Mostriamo subito tutti gli appelli di default
+    // Caricamento iniziale degli appelli
     this.cercaAppelli();
   },
   methods: {
@@ -83,12 +80,10 @@ export default {
         if (data.error) {
           this.errore = data.error;
         } else {
-          // CORREZIONE 1: data.appelli (al plurale, come la struct in Go)
           this.risultati = data.appelli || [];
         }
       } catch (err) {
-        // CORREZIONE 2: Stampiamo il vero errore invece di un testo fisso
-        this.errore = "Errore reale: " + err.message;
+        this.errore = "Errore di connessione: " + err.message;
       }
   },
     prenota(id) {
@@ -186,7 +181,7 @@ h2 {
 }
 
 .btn-book {
-  background-color: #48bb78; /* Verde per azioni positive */
+  background-color: #48bb78;
   color: white;
   border: none;
   padding: 8px 15px;

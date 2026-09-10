@@ -31,7 +31,6 @@
         <button type="submit" class="btn-login">Accedi</button>
       </form>
 
-      <!-- Mostriamo un messaggio se sbagliano (per ora finto) -->
       <div v-if="errore" class="error-msg">
         Credenziali errate. Riprova.
       </div>
@@ -56,17 +55,17 @@ export default {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
-            matricola: parseInt(this.matricola), // il tuo v-model
+            matricola: parseInt(this.matricola),
             password: this.password
           })
         });
         const data = await response.json();
 
         if (data.success) {
-          // Magia: salviamo la matricola nel browser!
+          // Memorizza la matricola dell'utente autenticato
           localStorage.setItem('utente_loggato', data.matricola);
           alert(`Benvenut* ${data.nome}!`);
-          this.$router.push('/dashboard'); // Vai alla pagina principale
+          this.$router.push('/dashboard');
         } else {
           this.errore = data.error;
         }
@@ -84,7 +83,7 @@ export default {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #e2e8f0; /* Grigio chiaro di sfondo */
+  background-color: #e2e8f0;
 }
 
 .login-box {
@@ -136,7 +135,7 @@ h2 {
   border: 1px solid #cbd5e0;
   border-radius: 4px;
   font-size: 16px;
-  box-sizing: border-box; /* Previene sbavature fuori dal form */
+  box-sizing: border-box;
 }
 
 .input-group input:focus {

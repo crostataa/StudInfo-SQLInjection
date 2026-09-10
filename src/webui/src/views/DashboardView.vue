@@ -1,19 +1,16 @@
 <template>
   <div class="dashboard">
 
-    <!-- Avviso in caso di errore -->
     <div v-if="errore" class="error-box" style="color: red; margin-bottom: 15px;">
       <strong>⚠️ Errore:</strong> {{ errore }}
     </div>
 
-    <!-- Mostriamo la dashboard solo a caricamento completato -->
     <div v-if="!caricamento">
       <header class="dashboard-header">
         <h2>Benvenuta/o, {{ studente.nome }} {{ studente.cognome }}</h2>
         <p class="matricola">Matricola: {{ studente.matricola }}</p>
       </header>
 
-      <!-- Riepilogo Statistiche -->
       <div class="stats-grid">
         <div class="stat-card">
           <h3>Media Ponderata</h3>
@@ -29,7 +26,6 @@
         </div>
       </div>
 
-      <!-- Prossimi impegni (Prenotazioni) -->
       <div class="upcoming-section">
         <h3>I tuoi prossimi appelli</h3>
         <table class="data-table" v-if="prossimiAppelli.length > 0">
@@ -91,14 +87,12 @@ export default {
     }
 
     try {
-      // 1. PRENDIAMO I DATI DEL PROFILO
       const resProfilo = await fetch(`http://127.0.0.1:3000/api/profilo/${matricola}`);
       const dataProfilo = await resProfilo.json();
       if (dataProfilo.studente && dataProfilo.studente.length > 0) {
         this.studente = dataProfilo.studente[0];
       }
 
-      // 2. PRENDIAMO IL LIBRETTO E CALCOLIAMO LE STATISTICHE
       const resLibretto = await fetch(`http://127.0.0.1:3000/api/libretto/${matricola}`);
       const dataLibretto = await resLibretto.json();
 
@@ -109,7 +103,7 @@ export default {
         let sommaCfu = 0;
         let sommaVotiPonderati = 0;
 
-        // Calcolo della media ponderata: (Voto * CFU) / (Totale CFU)
+        // Media ponderata: (Voto * CFU) / Totale CFU
         esami.forEach(esame => {
           sommaCfu += esame.cfu;
           sommaVotiPonderati += (esame.voto * esame.cfu);
@@ -117,12 +111,10 @@ export default {
 
         this.statistiche.cfu = sommaCfu;
         if (sommaCfu > 0) {
-          // Arrotonda a due cifre decimali
           this.statistiche.media = (sommaVotiPonderati / sommaCfu).toFixed(2);
         }
       }
 
-      // 3. PRENDIAMO LE PRENOTAZIONI FUTURE
       const resPrenotazioni = await fetch(`http://127.0.0.1:3000/api/prenotazioni?q=&matricola=${matricola}`);
       const dataPrenotazioni = await resPrenotazioni.json();
 
@@ -133,7 +125,7 @@ export default {
     } catch (err) {
       this.errore = "Impossibile caricare la dashboard: " + err.message;
     } finally {
-      this.caricamento = false; // Togliamo la scritta di caricamento
+      this.caricamento = false;
     }
   }
 }

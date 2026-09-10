@@ -39,9 +39,8 @@ import (
 	"sicurezza/service/database"
 
 	"github.com/ardanlabs/conf"
-	_ "github.com/go-sql-driver/mysql" //driver SQL
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/rs/cors"
-	_ "github.com/rs/cors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -88,10 +87,9 @@ func run() error {
 	// Start Database
 	logger.Println("initializing database support (MySQL)")
 
-	// INIZIO MODIFICA SQLi: Stringa di connessione al nostro container Docker
+	// Connessione a MySQL (multiStatements=true abilita le stacked queries per i test SQLi)
 	dsn := "appuser:apppassword@tcp(127.0.0.1:3306)/vulnerabile_db?multiStatements=true"
 	dbconn, err := sql.Open("mysql", dsn)
-	// FINE MODIFICA SQLi
 
 	if err != nil {
 		logger.WithError(err).Error("error opening MySQL DB")
@@ -102,12 +100,11 @@ func run() error {
 		_ = dbconn.Close()
 	}()
 
-	// Questo Ping verifica che la connessione avvenga davvero
 	if err := dbconn.Ping(); err != nil {
-		logger.Fatalf("Impossibile connettersi al database! Assicurati che Docker sia acceso: %v", err)
+		logger.Fatalf("Impossibile connettersi al database! Assicurati che Docker sia attivo: %v", err)
 	}
 
-	logger.Info("Connesso al database vulnerabile con successo!")
+	logger.Info("Connesso al database con successo")
 
 	db, err := database.New(dbconn)
 	if err != nil {
@@ -144,19 +141,13 @@ func run() error {
 		return fmt.Errorf("registering web UI handler: %w", err)
 	}
 
-	// ---------------- INIZIO MODIFICA CORS ----------------
-	// Questa è la versione Go del tuo "app.use(cors())"
-	// Creiamo un gestore CORS che accetta tutto (perfetto per lo sviluppo)
+	// Configurazione CORS permissiva per lo sviluppo
 	c := cors.AllowAll()
-
-	// "Avvolgiamo" il nostro router originale dentro l'imbuto del CORS
 	handlerConCors := c.Handler(router)
-	// ---------------- FINE MODIFICA CORS ------------------
 
 	// Create the API server
 	apiserver := http.Server{
-		Addr: cfg.Web.APIHost,
-		// Sostituisci 'router' con 'handlerConCors'
+		Addr:              cfg.Web.APIHost,
 		Handler:           handlerConCors,
 		ReadTimeout:       cfg.Web.ReadTimeout,
 		ReadHeaderTimeout: cfg.Web.ReadTimeout,

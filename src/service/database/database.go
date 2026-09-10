@@ -5,17 +5,17 @@ import (
 	"errors"
 )
 
-// AppDatabase è l'interfaccia che definisce cosa può fare il nostro database.
+// AppDatabase definisce l'interfaccia di accesso al database.
 type AppDatabase interface {
 	Ping() error
-	GetDB() *sql.DB // AGGIUNTA: permette all'API di accedere direttamente al motore SQL
+	GetDB() *sql.DB // Accesso diretto alla connessione *sql.DB
 }
 
 type appdbimpl struct {
 	c *sql.DB
 }
 
-// New crea una nuova istanza del nostro database.
+// New inizializza una nuova istanza di AppDatabase.
 func New(db *sql.DB) (AppDatabase, error) {
 	if db == nil {
 		return nil, errors.New("la connessione al database è nil")
@@ -25,13 +25,12 @@ func New(db *sql.DB) (AppDatabase, error) {
 	}, nil
 }
 
-// Ping controlla che la connessione sia viva.
+// Ping verifica lo stato della connessione al database.
 func (db *appdbimpl) Ping() error {
 	return db.c.Ping()
 }
 
-// GetDB restituisce il puntatore grezzo al database MySQL.
-// Lo useremo nel nostro file dell'API per lanciare la query SQL Injection!
+// GetDB restituisce la connessione sottostante *sql.DB.
 func (db *appdbimpl) GetDB() *sql.DB {
 	return db.c
 }

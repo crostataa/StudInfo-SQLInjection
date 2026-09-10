@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// Creiamo un'istanza di Axios configurata per puntare al nostro server Go
+// Configurazione client Axios per il backend
 const api = axios.create({
-	baseURL: 'http://localhost:3000', // L'indirizzo esatto del nostro backend!
+	baseURL: 'http://localhost:3000',
 	timeout: 10000,
 });
 

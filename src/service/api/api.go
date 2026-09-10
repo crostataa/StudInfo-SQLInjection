@@ -80,30 +80,24 @@ func New(cfg Config) (Router, error) {
 	router.RedirectTrailingSlash = false
 	router.RedirectFixedPath = false
 
-	// Creiamo l'istanza del nostro router personalizzato
 	rt := &_router{
 		router:     router,
 		baseLogger: cfg.Logger,
 		db:         cfg.Database,
 	}
 
-	// Quando arriva una GET su /api/users, usa la funzione searchUsers
+	// Ricerca appelli e prenotazioni
 	rt.router.GET("/api/appelli", rt.wrap(rt.searchAppelli))
 	rt.router.GET("/api/prenotazioni", rt.wrap(rt.searchPrenotazioni))
 
-	// Rotta POST per il login
-	//rt.router.POST("/api/login", rt.wrap(rt.login))
-
-	// Rotte GET con parametro dinamico (:matricola) per profilo e libretto
+	// Profilo e libretto studente
 	rt.router.GET("/api/profilo/:matricola", rt.wrap(rt.getProfilo))
 	rt.router.GET("/api/libretto/:matricola", rt.wrap(rt.getLibretto))
 
-	// Rotta POST per il vero e proprio login
+	// Autenticazione
 	rt.router.POST("/api/login", rt.wrap(rt.login))
 
-	// Ora possiamo restituire il router completo
 	return rt, nil
-
 }
 
 type _router struct {

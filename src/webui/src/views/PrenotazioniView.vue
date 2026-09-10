@@ -3,7 +3,6 @@
     <h2>Le tue Prenotazioni</h2>
     <p class="subtitle">Esami a cui sei attualmente iscritta/o.</p>
 
-    <!-- BARRA DI RICERCA -->
     <div class="search-box">
       <input
           type="text"
@@ -14,19 +13,17 @@
       <button @click="cercaPrenotazioni" class="btn-search">Cerca</button>
     </div>
 
-    <!-- BOX ERRORE SQL INJECTION (Nascosto, si attiverà in Fase 4) -->
+    <!-- Visualizzazione errore SQL (Error-Based SQLi) -->
     <div v-if="errore" class="error-box">
       <strong>⚠️ Errore di sistema:</strong><br>
       <span>{{ errore }}</span>
     </div>
 
-    <!-- TABELLA RISULTATI -->
     <div v-if="risultati.length > 0" class="results-section">
       <table class="data-table">
         <thead>
         <tr>
           <th>Id prenotazione</th>
-          <!-- COLONNA MATRICOLA RIMOSSA -->
           <th>Id appello</th>
           <th>Insegnamento</th>
           <th>Data esame</th>
@@ -38,14 +35,12 @@
         <tbody>
         <tr v-for="prenotazione in risultati" :key="prenotazione.id_prenotazione">
           <td>{{ prenotazione.id_prenotazione }}</td>
-          <!-- DATO MATRICOLA RIMOSSO -->
           <td>{{ prenotazione.id_appello }}</td>
           <td>{{ prenotazione.insegnamento }}</td>
           <td>{{ prenotazione.data_esame }}</td>
           <td>{{ prenotazione.aula }}</td>
           <td>{{ prenotazione.stato }}</td>
           <td>
-            <!-- (Nota: se queste sono le prenotazioni già effettuate, potresti voler rinominare il bottone in "Annulla" anziché "Prenota"!) -->
             <button class="btn-book" @click="annulla(prenotazione.id)">Annulla</button>
           </td>
         </tr>
@@ -75,7 +70,6 @@ mounted() {
 },
   methods: {
     async cercaPrenotazioni() {
-      // 1. Prendi la matricola e resetta gli errori precedenti
       const matricola = localStorage.getItem('utente_loggato');
       this.errore = null;
       this.haCercato = true;
@@ -86,18 +80,14 @@ mounted() {
       }
 
       try {
-        // 2. Chiamata al server Go
         const url = `http://127.0.0.1:3000/api/prenotazioni?q=${encodeURIComponent(this.ricerca)}&matricola=${matricola}`;
         const response = await fetch(url);
         const data = await response.json();
 
-        // 3. Gestione dei dati
         if (data.error) {
-          // Se Go ci manda un errore (es. SQL Injection fail), lo mostriamo
           this.errore = data.error;
           this.risultati = [];
         } else if (data.prenotazione) {
-          // Se ci sono risultati, popoliamo la tabella
           this.risultati = data.prenotazione;
         } else {
           this.risultati = [];
@@ -201,7 +191,7 @@ h2 {
 }
 
 .btn-book {
-  background-color: #48bb78; /* Verde per azioni positive */
+  background-color: #48bb78;
   color: white;
   border: none;
   padding: 8px 15px;

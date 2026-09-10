@@ -3,12 +3,10 @@
     <h2>Libretto Universitario</h2>
     <p class="subtitle">Riepilogo della tua carriera accademica.</p>
 
-    <!-- BOX ERRORE (Nascosto se va tutto bene) -->
     <div v-if="errore" class="error-box" style="color: red; margin-bottom: 15px;">
       <strong>⚠️ Errore:</strong> {{ errore }}
     </div>
 
-    <!-- TABELLA (Mostrata se ci sono esami caricati) -->
     <table v-if="esami && esami.length > 0" class="data-table">
       <thead>
       <tr>
@@ -19,9 +17,7 @@
       </tr>
       </thead>
       <tbody>
-      <!-- Usiamo id_appello come chiave univoca -->
       <tr v-for="esame in esami" :key="esame.id_appello">
-        <!-- Usiamo i nomi esatti che arrivano da Go -->
         <td><strong>{{ esame.insegnamento }}</strong></td>
         <td>{{ esame.data_registrazione }}</td>
         <td><span class="voto">{{ esame.voto }}</span></td>
@@ -30,7 +26,6 @@
       </tbody>
     </table>
 
-    <!-- MESSAGGIO SE IL LIBRETTO E' VUOTO (Nessun esame dato) -->
     <div v-else-if="!errore && esami.length === 0">
       <p>Nessun esame registrato a libretto.</p>
     </div>
@@ -43,7 +38,7 @@ export default {
   name: 'LibrettoView',
   data() {
     return {
-      esami: [],   // Array vuoto che conterrà gli esami
+      esami: [],
       errore: null
     };
   },
@@ -62,7 +57,7 @@ export default {
       if (data.error) {
         this.errore = data.error;
       } else if (data.libretto) {
-        this.esami = data.libretto; // Salviamo la lista degli esami
+        this.esami = data.libretto;
       }
     } catch (err) {
       this.errore = "Errore durante il caricamento del libretto.";

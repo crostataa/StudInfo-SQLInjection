@@ -3,12 +3,10 @@
     <h2>Profilo Personale</h2>
     <p class="subtitle">I tuoi dati anagrafici e di immatricolazione.</p>
 
-    <!-- BOX ERRORE (Nascosto se va tutto bene) -->
     <div v-if="errore" class="error-box" style="color: red; margin-bottom: 15px;">
       <strong>⚠️ Errore:</strong> {{ errore }}
     </div>
 
-    <!-- CARD DEL PROFILO (Si mostra solo quando i dati sono stati scaricati) -->
     <div v-if="profilo" class="profile-card">
       <div class="profile-row"><strong>Nome:</strong> {{ profilo.nome }}</div>
       <div class="profile-row"><strong>Cognome:</strong> {{ profilo.cognome }}</div>
@@ -18,7 +16,6 @@
       <div class="profile-row"><strong>Email Istituzionale:</strong> {{ profilo.email }}</div>
     </div>
 
-    <!-- MESSAGGIO DI CARICAMENTO -->
     <div v-else-if="!errore">
       <p>Caricamento dati profilo in corso...</p>
     </div>
@@ -32,10 +29,10 @@ export default {
     return { profilo: null, errore: null }
   },
   async mounted() {
-    // Leggiamo chi è loggato
     const matricola = localStorage.getItem('utente_loggato');
     if (!matricola) {
-      this.$router.push('/login'); // Se non sei loggato, via!
+      // Reindirizza al login se l'utente non è autenticato
+      this.$router.push('/login');
       return;
     }
 
@@ -43,7 +40,7 @@ export default {
       const response = await fetch(`http://127.0.0.1:3000/api/profilo/${matricola}`);
       const data = await response.json();
       if (data.studente && data.studente.length > 0) {
-        this.profilo = data.studente[0]; // Salviamo i dati nel Vue
+        this.profilo = data.studente[0];
       }
     } catch (err) {
       this.errore = "Impossibile caricare il profilo";

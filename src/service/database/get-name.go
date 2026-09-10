@@ -1,6 +1,6 @@
 package database
 
-// GetName is an example that shows you how to query data
+// GetName è un esempio di lettura dal database
 func (db *appdbimpl) GetName() (string, error) {
 	var name string
 	err := db.c.QueryRow("SELECT name FROM example_table WHERE id=1").Scan(&name)

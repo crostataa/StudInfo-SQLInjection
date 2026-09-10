@@ -1,5 +1,3 @@
-// --------- CODICE VULNERABILE ---------
-
 package api
 
 import (
@@ -12,14 +10,15 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-// 1. GESTIONE LOGIN (Ora impostato come VULNERABILE per testare la Tautologia)
+// ==================== CODICE VULNERABILE ====================
+
+// 1. Gestione login (vulnerabile a tautologia)
 func (rt *_router) login(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var req LoginRequest
 	var res LoginResponse
 
-	// Leggiamo matricola e password inviate da Vue
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		res.Error = "Dati non validi"
 		json.NewEncoder(w).Encode(res)
@@ -28,19 +27,14 @@ func (rt *_router) login(w http.ResponseWriter, r *http.Request, ps httprouter.P
 
 	db := rt.db.GetDB()
 
-	// --- INIZIO CODICE VULNERABILE ---
-	// Incolliamo la password direttamente nella stringa SQL usando fmt.Sprintf
+	// Query vulnerabile a SQL Injection (tautologia tramite interpolazione stringa)
 	query := fmt.Sprintf("SELECT matricola, nome, cognome FROM students WHERE matricola = %d AND password = '%s'", req.Matricola, req.Password)
-
-	// Eseguiamo la query grezza (senza passare i parametri separatamente)
 	err := db.QueryRow(query).Scan(&res.Matricola, &res.Nome, &res.Cognome)
-	// --- FINE CODICE VULNERABILE ---
 
 	/*
-		// --- INIZIO CODICE SICURO ---
+		// Alternativa sicura (Prepared Statement):
 		query := "SELECT matricola, nome, cognome FROM students WHERE matricola = ? AND password = ?"
 		err := db.QueryRow(query, req.Matricola, req.Password).Scan(&res.Matricola, &res.Nome, &res.Cognome)
-		// --- FINE CODICE SICURO ---
 	*/
 
 	if err != nil {
@@ -53,7 +47,7 @@ func (rt *_router) login(w http.ResponseWriter, r *http.Request, ps httprouter.P
 	json.NewEncoder(w).Encode(res)
 }
 
-// 2. GESTIONE PROFILO (Sicuro)
+// 2. Gestione profilo ( vulnerabile senza Prepared Statement)
 func (rt *_router) getProfilo(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -77,7 +71,7 @@ func (rt *_router) getProfilo(w http.ResponseWriter, r *http.Request, ps httprou
 	json.NewEncoder(w).Encode(res)
 }
 
-// 3. GESTIONE LIBRETTO (Sicuro e ripristinato)
+// 3. Gestione libretto (protetta con Prepared Statement)
 func (rt *_router) getLibretto(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -88,12 +82,9 @@ func (rt *_router) getLibretto(w http.ResponseWriter, r *http.Request, ps httpro
 	res.Libretto = make([]Libretto, 0)
 
 	db := rt.db.GetDB()
-
-	// Ripristinata la query corretta per il libretto
 	query := "SELECT matricola, id_appello, insegnamento, data_registrazione, voto, CFU FROM libretto_esami WHERE matricola = ?"
 
 	rows, err := db.Query(query, matricola)
-
 	if err != nil {
 		res.Error = err.Error()
 		json.NewEncoder(w).Encode(res)
@@ -114,27 +105,15 @@ func (rt *_router) getLibretto(w http.ResponseWriter, r *http.Request, ps httpro
 }
 
 /*
-// -------- CODICE SICURO ---------------
-package api
+// ==================== CODICE SICURO ====================
 
-import (
-"encoding/json"
-"fmt"
-"net/http"
-"sicurezza/service/api/reqcontext"
-"strconv"
-
-"github.com/julienschmidt/httprouter"
-)
-
-// 1. GESTIONE LOGIN (Messo in sicurezza con Prepared Statement)
+// 1. Gestione login (messo in sicurezza con Prepared Statement)
 func (rt *_router) login(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	w.Header().Set("Content-Type", "application/json")
 
 	var req LoginRequest
 	var res LoginResponse
 
-	// Leggiamo matricola e password inviate da Vue
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		res.Error = "Dati non validi"
 		json.NewEncoder(w).Encode(res)
@@ -143,14 +122,9 @@ func (rt *_router) login(w http.ResponseWriter, r *http.Request, ps httprouter.P
 
 	db := rt.db.GetDB()
 
-	// --- INIZIO CODICE SICURO ---
-	// Usiamo i segnaposto (?) per separare la struttura della query dai dati dell'utente.
-	// Questo neutralizza completamente gli attacchi di Tautologia.
+	// Prepared Statement: separa la struttura SQL dai dati dell'utente (neutralizza la tautologia)
 	query := "SELECT matricola, nome, cognome FROM students WHERE matricola = ? AND password = ?"
-
-	// Passiamo i parametri separatamente nella funzione QueryRow
 	err := db.QueryRow(query, req.Matricola, req.Password).Scan(&res.Matricola, &res.Nome, &res.Cognome)
-	// --- FINE CODICE SICURO ---
 
 	if err != nil {
 		res.Success = false
@@ -162,7 +136,7 @@ func (rt *_router) login(w http.ResponseWriter, r *http.Request, ps httprouter.P
 	json.NewEncoder(w).Encode(res)
 }
 
-// 2. GESTIONE PROFILO (Sicuro)
+// 2. Gestione profilo (sicuro)
 func (rt *_router) getProfilo(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -186,7 +160,7 @@ func (rt *_router) getProfilo(w http.ResponseWriter, r *http.Request, ps httprou
 	json.NewEncoder(w).Encode(res)
 }
 
-// 3. GESTIONE LIBRETTO (Sicuro)
+// 3. Gestione libretto (sicuro)
 func (rt *_router) getLibretto(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -197,12 +171,9 @@ func (rt *_router) getLibretto(w http.ResponseWriter, r *http.Request, ps httpro
 	res.Libretto = make([]Libretto, 0)
 
 	db := rt.db.GetDB()
-
-	// Query corretta per il libretto (già protetta con Prepared Statement)
 	query := "SELECT matricola, id_appello, insegnamento, data_registrazione, voto, CFU FROM libretto_esami WHERE matricola = ?"
 
 	rows, err := db.Query(query, matricola)
-
 	if err != nil {
 		res.Error = err.Error()
 		json.NewEncoder(w).Encode(res)
@@ -221,5 +192,4 @@ func (rt *_router) getLibretto(w http.ResponseWriter, r *http.Request, ps httpro
 
 	json.NewEncoder(w).Encode(res)
 }
-
 */

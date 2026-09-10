@@ -1,11 +1,6 @@
 package api
 
-/*
-Il server GO ha bisogno di strutture (struct) per capire come impacchettare i dati presi
-dal database e inviarli a Vue.js (il frontend)
-
-Le "etichette" (tag) sulla destra indicano a Go come rinominare i campi quando li converte in JSON.
-*/
+// Strutture dati per la serializzazione JSON delle entità del database e delle risposte API
 
 type Studente struct {
 	Matricola       int    `json:"matricola"`
@@ -22,7 +17,6 @@ type StudentiList struct {
 	Error    string     `json:"error, omitempty"`
 }
 
-// -----------------------
 type Appello struct {
 	ID           int    `json:"id"`
 	Insegnamento string `json:"insegnamento"`
@@ -30,15 +24,12 @@ type Appello struct {
 	Data         string `json:"data"`
 }
 
-// AppelliList sarà il "pacchetto" completo che invieremo al frontend Vue.js.
-// Conterrà sia la lista degli appelli trovati, sia eventuali messaggi di errore del database
-// (il campo Error è fondamentale per far vedere a schermo l'Error-Based SQL Injection).
+// AppelliList contiene l'elenco degli appelli ed eventuali errori del database (per Error-Based SQLi)
 type AppelliList struct {
 	Appelli []Appello `json:"appelli"`
-	Error   string    `json:"error,omitempty"` // omitempty nasconde il campo nel JSON se non ci sono errori
+	Error   string    `json:"error,omitempty"`
 }
 
-// ----------------
 type Stato string
 
 const (
@@ -62,8 +53,6 @@ type PrenotazioniList struct {
 	Error        string         `json:"error,omitempty"`
 }
 
-//-----------------------
-
 type Libretto struct {
 	Matricola          int    `json:"matricola"`
 	Id_appello         int    `json:"id_appello"`
@@ -78,7 +67,6 @@ type LibrettoList struct {
 	Error    string     `json:"error, omitempty"`
 }
 
-// ---------------------
 type LoginRequest struct {
 	Matricola int    `json:"matricola"`
 	Password  string `json:"password"`
