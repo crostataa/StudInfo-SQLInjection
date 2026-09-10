@@ -1,4 +1,19 @@
+/*
+//------------- CODICE VULNERABILE -------------//
+
 package api
+
+import (
+	"encoding/json"
+	"net/http"
+	"sicurezza/service/api/reqcontext"
+
+	"github.com/julienschmidt/httprouter"
+)
+
+
+
+
 
 import (
 	"encoding/json"
@@ -7,7 +22,6 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-//------------- CODICE VULNERABILE -------------//
 import (
 	"fmt"
 	_ "fmt"
@@ -48,7 +62,6 @@ func (rt *_router) searchPrenotazioni(w http.ResponseWriter, r *http.Request, ps
 	//step 5: estrazione
 	for rows.Next() {
 		var p Prenotazione
-		// ATTENZIONE: Ho rimosso &p.Matricola da qui per farlo combaciare con la query sopra!
 		if err := rows.Scan(&p.Id_prenotazione, &p.Id_appello, &p.Insegnamento, &p.Data_esame, &p.Aula, &p.Stato); err != nil {
 			rt.baseLogger.WithError(err).Error("Error scanning row")
 			continue
@@ -56,74 +69,16 @@ func (rt *_router) searchPrenotazioni(w http.ResponseWriter, r *http.Request, ps
 		result.Prenotazione = append(result.Prenotazione, p)
 	}
 
-	//step 6: risposta, inviamo il pacchetto JSON completo al client
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(result)
-
-}
-
-//---------------------------------------------------------------------------------
-
-//------------- CODICE SICURO -------------//
-/*
-
-import (
-	_ "fmt"
-	"sicurezza/service/api/reqcontext"
-)
-
-// searchUsers è la funzione che risponderà quando qualcuno visita /api/users
-func (rt *_router) searchAppelli(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	// Diciamo al browser che stiamo restituendo dati in formato JSON
-	w.Header().Set("Content-Type", "application/json")
-
-
-	//prepariamo la nostra struttura dati (quella creata nel file struct.go)
-	var result AppelliList
-	result.Appelli = make([]Appello, 0) //inizializziamo una lista vuota
-
-	//step 1:
-	//estraiamo ciò che ha scritto l'utente nella barra di ricerca
-
-	queryParam := r.URL.Query().Get("q")
-
-	// step 2: LA DIFESA (Prepared Statement)
-	// Al posto di fmt.Sprintf, mettiamo un segnaposto (?) nella query
-	sqlQuery := "SELECT id, insegnamento, docente, data FROM appelli WHERE insegnamento LIKE ?"
-
-	// Aggiungiamo i simboli % direttamente alla variabile in Go, non in SQL
-	parametroRicerca := "%" + queryParam + "%"
-
-	// step 3: Esecuzione sicura
-	db := rt.db.GetDB()
-
-	// Passiamo 'parametroRicerca' come secondo argomento.
-	// Go e MySQL lavoreranno insieme per sterilizzare questo dato!
-	rows, err := db.Query(sqlQuery, parametroRicerca)
-
-	//step 4: error-based SQLi; se il database va in errore, non lo nascondiamo,
-	//ma inviamo l'errore direttamente al frontend dentro al campo "error" del JSON
-
-	if err != nil {
-		result.Error = err.Error()
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(result)
-		return
-	}
-	defer rows.Close()
-
-	//step 5: estrazione; se la query ha successo, leggiamo gli appello trovati!
-	for rows.Next() {
-		var a Appello
-		//mappiamo le 4 colonne chieste nella SELECT (cioè id, insegnamento, docente e data) nei campi della nostra struct (Appello)
-
-		if err := rows.Scan(&a.ID, &a.Insegnamento, &a.Docente, &a.Data); err != nil {
-			rt.baseLogger.WithError(err).Error("Error scanning row")
-			continue
+	// --- INIZIO MODIFICA PER IL TEST (ABILITA STACKED QUERIES) ---
+	// Costringiamo il driver a processare anche i comandi successivi (es. la DELETE)
+	// ignorando i risultati, ma facendoli eseguire fisicamente al database.
+	for rows.NextResultSet() {
+		// Consumiamo eventuali righe restituite dai comandi accodati
+		for rows.Next() {
+			// non facciamo nulla
 		}
-		result.Appelli = append(result.Appelli, a)
 	}
+	// --- FINE MODIFICA PER IL TEST ---
 
 	//step 6: risposta, inviamo il pacchetto JSON completo al client
 
@@ -133,3 +88,69 @@ func (rt *_router) searchAppelli(w http.ResponseWriter, r *http.Request, ps http
 }
 
 */
+
+//---------------------------------------------------------------------------------
+
+//------------- CODICE SICURO -------------//
+
+package api
+
+import (
+	"encoding/json"
+	"net/http"
+
+	"sicurezza/service/api/reqcontext"
+
+	"github.com/julienschmidt/httprouter"
+)
+
+// searchPrenotazioni è la funzione che risponderà quando qualcuno visita /api/prenotazioni
+func (rt *_router) searchPrenotazioni(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	// Diciamo al browser che stiamo restituendo dati in formato JSON
+	w.Header().Set("Content-Type", "application/json")
+
+	// Prepariamo la nostra struttura dati
+	var result PrenotazioniList
+	result.Prenotazione = make([]Prenotazione, 0) // Inizializziamo una lista vuota
+
+	// Step 1: Estraiamo ciò che ha scritto l'utente e la sua matricola
+	queryParam := r.URL.Query().Get("q")
+	matricolaUtente := r.URL.Query().Get("matricola") // Estratto inviato da Vue
+
+	// Step 2: LA DIFESA (Prepared Statement)
+	// Nessun fmt.Sprintf. Usiamo i segnaposto (?) per i dati variabili.
+	sqlQuery := "SELECT id_prenotazione, id_appello, insegnamento, data_esame, aula, stato FROM prenotazioni_esami WHERE matricola = ? AND insegnamento LIKE ?"
+
+	// Prepariamo il parametro per il LIKE direttamente in Go
+	parametroRicerca := "%" + queryParam + "%"
+
+	// Step 3: Esecuzione sicura
+	db := rt.db.GetDB()
+
+	// Passiamo i parametri (matricola e ricerca) direttamente a db.Query
+	// Il driver MySQL tratterà questi valori RIGOROSAMENTE come dati e mai come comandi SQL.
+	rows, err := db.Query(sqlQuery, matricolaUtente, parametroRicerca)
+
+	// Step 4: Error-based SQLi mitigata (l'errore di query viene comunque gestito)
+	if err != nil {
+		result.Error = err.Error()
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(result)
+		return
+	}
+	defer rows.Close()
+
+	// Step 5: Estrazione
+	for rows.Next() {
+		var p Prenotazione
+		if err := rows.Scan(&p.Id_prenotazione, &p.Id_appello, &p.Insegnamento, &p.Data_esame, &p.Aula, &p.Stato); err != nil {
+			rt.baseLogger.WithError(err).Error("Error scanning row")
+			continue
+		}
+		result.Prenotazione = append(result.Prenotazione, p)
+	}
+
+	// Step 6: Risposta, inviamo il pacchetto JSON completo al client
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(result)
+}

@@ -87,7 +87,7 @@ mounted() {
 
       try {
         // 2. Chiamata al server Go
-        const url = `http://127.0.0.1:3000/api/prenotazioni?q=${this.ricerca}&matricola=${matricola}`;
+        const url = `http://127.0.0.1:3000/api/prenotazioni?q=${encodeURIComponent(this.ricerca)}&matricola=${matricola}`;
         const response = await fetch(url);
         const data = await response.json();
 
