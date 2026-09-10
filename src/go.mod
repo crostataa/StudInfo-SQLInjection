@@ -8,6 +8,7 @@ require (
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/gorilla/handlers v1.5.2
 	github.com/julienschmidt/httprouter v1.3.0
+	github.com/rs/cors v1.11.1
 	github.com/sirupsen/logrus v1.10.0
 	gopkg.in/yaml.v2 v2.4.0
 )

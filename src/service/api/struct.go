@@ -8,13 +8,13 @@ Le "etichette" (tag) sulla destra indicano a Go come rinominare i campi quando l
 */
 
 type Studente struct {
-	matricola       int    `json:"matricola"`
-	nome            string `json:"nome"`
-	cognome         string `json:"cognome"`
-	data_di_nascita string `json:"data_di_nascita"`
-	indirizzo       string `json:"indirizzo"`
-	password        string `json:"password"`
-	email           string `json:"email"`
+	Matricola       int    `json:"matricola"`
+	Nome            string `json:"nome"`
+	Cognome         string `json:"cognome"`
+	Data_di_nascita string `json:"data_di_nascita"`
+	Indirizzo       string `json:"indirizzo"`
+	Password        string `json:"password"`
+	Email           string `json:"email"`
 }
 
 type StudentiList struct {
@@ -65,15 +65,29 @@ type PrenotazioniList struct {
 //-----------------------
 
 type Libretto struct {
-	matricola          int    `json:"matricola"`
-	id_appello         int    `json:"id_appello"`
-	insegnamento       int    `json:"insegnamento"`
-	data_registrazione string `json:"data_registrazione"`
-	voto               int    `json:"voto"`
+	Matricola          int    `json:"matricola"`
+	Id_appello         int    `json:"id_appello"`
+	Insegnamento       int    `json:"insegnamento"`
+	Data_registrazione string `json:"data_registrazione"`
+	Voto               int    `json:"voto"`
 	CFU                string `json:"cfu"`
 }
 
 type LibrettoList struct {
 	Libretto []Libretto `json:"libretto"`
 	Error    string     `json:"error, omitempty"`
+}
+
+// ---------------------
+type LoginRequest struct {
+	Matricola int    `json:"matricola"`
+	Password  string `json:"password"`
+}
+
+type LoginResponse struct {
+	Success   bool   `json:"success"`
+	Matricola int    `json:"matricola"`
+	Nome      string `json:"nome"`
+	Cognome   string `json:"cognome"`
+	Error     string `json:"error,omitempty"`
 }

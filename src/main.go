@@ -34,6 +34,7 @@ func main() {
 
 	//------------CODICE VULNERABILE-------------
 	// NOTA BENE: multiStatements=true è FONDAMENTALE. Permette l'esecuzione di query separate da ";" (Piggybacking).
+
 	dsn := "appuser:apppassword@tcp(db:3306)/vulnerabile_db?multiStatements=true"
 
 	//-----------CODICE SICURO-------------------

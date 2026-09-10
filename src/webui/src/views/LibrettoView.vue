@@ -28,11 +28,21 @@
 export default {
   name: 'LibrettoView',
   data() {
-    return {
-      esami: [
-        { id: 1, materia: 'Architettura dei Calcolatori', data: '12/02/2025', voto: '28', cfu: 9 },
-        { id: 2, materia: 'Programmazione I', data: '20/06/2025', voto: '30 L', cfu: 12 }
-      ]
+    return { esami: [], errore: null }
+  },
+  async mounted() {
+    const matricola = localStorage.getItem('utente_loggato');
+    if (!matricola) return;
+
+    try {
+      const response = await fetch(`http://127.0.0.1:3000/api/libretto/${matricola}`);
+      const data = await response.json();
+
+      if (data.libretto) {
+        this.esami = data.libretto;
+      }
+    } catch (err) {
+      this.errore = "Impossibile caricare il libretto";
     }
   }
 }

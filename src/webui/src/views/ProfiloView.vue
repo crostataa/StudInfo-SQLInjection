@@ -15,7 +15,30 @@
 </template>
 
 <script>
-export default { name: 'ProfiloView' }
+export default {
+  name: 'ProfiloView',
+  data() {
+    return { profilo: null, errore: null }
+  },
+  async mounted() {
+    // Leggiamo chi è loggato
+    const matricola = localStorage.getItem('utente_loggato');
+    if (!matricola) {
+      this.$router.push('/login'); // Se non sei loggato, via!
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://127.0.0.1:3000/api/profilo/${matricola}`);
+      const data = await response.json();
+      if (data.studente && data.studente.length > 0) {
+        this.profilo = data.studente[0]; // Salviamo i dati nel Vue
+      }
+    } catch (err) {
+      this.errore = "Impossibile caricare il profilo";
+    }
+  }
+}
 </script>
 
 <style scoped>

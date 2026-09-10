@@ -40,6 +40,8 @@ import (
 
 	"github.com/ardanlabs/conf"
 	_ "github.com/go-sql-driver/mysql" //driver SQL
+	"github.com/rs/cors"
+	_ "github.com/rs/cors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -142,13 +144,20 @@ func run() error {
 		return fmt.Errorf("registering web UI handler: %w", err)
 	}
 
-	// Apply CORS policy
-	router = applyCORSHandler(router)
+	// ---------------- INIZIO MODIFICA CORS ----------------
+	// Questa è la versione Go del tuo "app.use(cors())"
+	// Creiamo un gestore CORS che accetta tutto (perfetto per lo sviluppo)
+	c := cors.AllowAll()
+
+	// "Avvolgiamo" il nostro router originale dentro l'imbuto del CORS
+	handlerConCors := c.Handler(router)
+	// ---------------- FINE MODIFICA CORS ------------------
 
 	// Create the API server
 	apiserver := http.Server{
-		Addr:              cfg.Web.APIHost,
-		Handler:           router,
+		Addr: cfg.Web.APIHost,
+		// Sostituisci 'router' con 'handlerConCors'
+		Handler:           handlerConCors,
 		ReadTimeout:       cfg.Web.ReadTimeout,
 		ReadHeaderTimeout: cfg.Web.ReadTimeout,
 		WriteTimeout:      cfg.Web.WriteTimeout,

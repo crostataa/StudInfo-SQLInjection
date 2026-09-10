@@ -19,8 +19,6 @@ func (rt *_router) searchAppelli(w http.ResponseWriter, r *http.Request, ps http
 	// Diciamo al browser che stiamo restituendo dati in formato JSON
 	w.Header().Set("Content-Type", "application/json")
 
-	//accetta richieste da qualunque porta, disabilita il CORS
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	//prepariamo la nostra struttura dati (quella creata nel file struct.go)
 	var result AppelliList
 	result.Appelli = make([]Appello, 0) //inizializziamo una lista vuota
@@ -87,8 +85,7 @@ func (rt *_router) searchAppelli(w http.ResponseWriter, r *http.Request, ps http
 	// Diciamo al browser che stiamo restituendo dati in formato JSON
 	w.Header().Set("Content-Type", "application/json")
 
-	//accetta richieste da qualunque porta, disabilita il CORS
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	//prepariamo la nostra struttura dati (quella creata nel file struct.go)
 	var result AppelliList
 	result.Appelli = make([]Appello, 0) //inizializziamo una lista vuota

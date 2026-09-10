@@ -91,6 +91,16 @@ func New(cfg Config) (Router, error) {
 	rt.router.GET("/api/appelli", rt.wrap(rt.searchAppelli))
 	rt.router.GET("/api/prenotazioni", rt.wrap(rt.searchPrenotazioni))
 
+	// Rotta POST per il login
+	//rt.router.POST("/api/login", rt.wrap(rt.login))
+
+	// Rotte GET con parametro dinamico (:matricola) per profilo e libretto
+	rt.router.GET("/api/profilo/:matricola", rt.wrap(rt.getProfilo))
+	rt.router.GET("/api/libretto/:matricola", rt.wrap(rt.getLibretto))
+
+	// Rotta POST per il vero e proprio login
+	rt.router.POST("/api/login", rt.wrap(rt.login))
+
 	// Ora possiamo restituire il router completo
 	return rt, nil
 

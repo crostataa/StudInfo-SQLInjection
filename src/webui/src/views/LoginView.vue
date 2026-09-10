@@ -50,13 +50,28 @@ export default {
     }
   },
   methods: {
-    effettuaLogin() {
+    async effettuaLogin() {
+      try {
+        const response = await fetch('http://127.0.0.1:3000/api/login', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            matricola: parseInt(this.matricola), // il tuo v-model
+            password: this.password
+          })
+        });
+        const data = await response.json();
 
-      if (this.matricola !== '' && this.password !== '') {
-        // Il router ci sposta istantaneamente alla dashboard!
-        this.$router.push('/dashboard');
-      } else {
-        this.errore = true;
+        if (data.success) {
+          // Magia: salviamo la matricola nel browser!
+          localStorage.setItem('utente_loggato', data.matricola);
+          alert(`Benvenut* ${data.nome}!`);
+          this.$router.push('/dashboard'); // Vai alla pagina principale
+        } else {
+          this.errore = data.error;
+        }
+      } catch (err) {
+        this.errore = "Errore di connessione";
       }
     }
   }
